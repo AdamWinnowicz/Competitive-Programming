@@ -71,60 +71,41 @@ using namespace std;
     
 */
 
-string query(int start, set<int> nums){
-    string q;
-    q += "? " + to_string(start) + ' ' + to_string(nums.size());
-    for(int val : nums) q += " " + to_string(val);
-    return q;
-}
-
 void test_case(){
     int n; cin >> n;
-    vector<vector<int>> start_of_path_with_len(n + 1);
-    set<int> vals;
-    for(int i = 1; i <= n; i++) vals.insert(i);
-    int max_len = 0;
-    int start = -1;
+    vector<unordered_set<int>> starts(n + 1);
+    int max_length = 0, start = -1;
     for(int i = 1; i <= n; i++){
-        cout << query(i, vals) << '\n'; cout.flush();
-        int len; cin >> len;
-        start_of_path_with_len[len].push_back(i);
-        if(len > max_len){
-            max_len = len;
+        cout << "? " << i << ' ' << n; for(int j = 1; j <= n; j++) cout << ' ' << j; cout << '\n';
+        int x; cin >> x;
+        starts[x].insert(i);
+        if(x > max_length){
+            max_length = x;
             start = i;
         }
     }
+    unordered_set<int> vals;
+    for(int i = 1; i <= n; i++) vals.insert(i);
     
-    for(int len = 1; len <= n; len++){
-        vector<int> starts = start_of_path_with_len[len];
-        if(len == max_len){
-            for(int s : starts){
-                if(s != start) vals.erase(s);
-            }
-            break;
+    vector<int> ans = {start};
+    for(int val : starts[max_length]) if(val != start) vals.erase(val);
+
+    for(int i = max_length - 1; i > 0; i--){
+
+        for(int v : starts[i]){
+
+            cout << "? " << start << ' ' << vals.size() - 1; for(int val : vals) if(val != v) cout << ' ' << val; cout << '\n';
+            int x; cin >> x;
+            if(x != max_length) ans.push_back(v);
+            else vals.erase(v);
         }
-        if(starts.size() < 2) continue;
-        vector<int> new_starts;
-        for(int s : starts){
-            set<int> new_set;
-            for(int val : vals){
-                if(val != s) new_set.insert(val);
-            }
-            cout << query(start, new_set) << '\n'; cout.flush();
-            int len; cin >> len;
-            if(len == max_len) vals.erase(s);
-            else new_starts.push_back(s);
-        }
-        start_of_path_with_len[len] = new_starts;
     }
-    string ans = "! " + to_string(max_len);
-    for(int len = max_len; len > 0; len--) ans += " " + to_string(start_of_path_with_len[len][0]);
-    cout << ans << '\n'; cout.flush();
+    cout << "! " << ans.size();
+    for(int val : ans) cout << ' ' << val;
+    cout << '\n';
 }
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(0);
 
     int t; cin >> t;
     while(t--){
